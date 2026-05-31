@@ -10,7 +10,7 @@
 
 - ![奶龙](https://avatars.githubusercontent.com/u/59904423?s=400&u=e2d918cc9959b82599bb4dbfcebb8b912880b9dc&v=4){ width="30" style="border-radius:50%; vertical-align: middle; margin-right: .5rem;" } [奶龙](https://0b1t.tech/){:target="_blank" rel="noopener"}
 
-- ![la0d3ng/Wh1te_w0Od](https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/Logo-NavBar@3x.png){ width="30" style="border-radius:50%; vertical-align: middle; margin-right: .5rem;" } [la0d3ng/Wh1te_w0Od](https://la0d3ng.github.io/){:target="_blank" rel="noopener"}
+- ![la0d3ng/Wh1te_w0Od](https://la0d3ng0.github.io/assets/images/df_logo.jpg){ width="30" style="border-radius:50%; vertical-align: middle; margin-right: .5rem;" } [la0d3ng/Wh1te_w0Od](https://la0d3ng0.github.io/){:target="_blank" rel="noopener"}
 
 - ![Xsh11p](https://xsh11p.github.io/images/logo.png){ width="30" style="border-radius:50%; vertical-align: middle; margin-right: .5rem;" } [Xsheep](https://Xsh11p.github.io){:target="_blank" rel="noopener"}
 
