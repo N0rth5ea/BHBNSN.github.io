@@ -147,6 +147,8 @@ Module 一般通过
     - data: 可选数据对象
 
 
+### frida-trace
+
 
 ## frida 检测隐藏
 
@@ -199,3 +201,7 @@ Module 一般通过
     ```bash
     frida -U -f 进程名 -l hook.js
     ```
+  
+### 进程文件检测
+- 检测：检测 /proc/self/maps 中是否存在 frida-server 的映射
+- 绕过：hook 相关函数
