@@ -156,10 +156,7 @@ nav:
               - Zygote 孵化流程: study/android/aosp/zygote_fork.md
               - System Server 启动: study/android/aosp/systemserver_launch.md
               - 应用启动流程: study/android/aosp/app_launch.md
-      - 课程:
-          - 操作系统:
-              - 概述: study/courses/OS/index.md
-              - 进程调度: study/courses/OS/Scheduling.md
+          - 环境检测与对抗: study/android/detect_and_anti.md
       - wp集锦:
           - 2025-10:
               - 强网杯2025: study/wp/2025-10/qwb_2025.md
