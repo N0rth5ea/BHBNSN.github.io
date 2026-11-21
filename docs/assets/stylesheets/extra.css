@@ -2,7 +2,7 @@
    🌌 全局背景
 ========================= */
 body {
-  background-image: url("../../images/bg.gif");
+  background-image: url("../../images/bg.jpg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
