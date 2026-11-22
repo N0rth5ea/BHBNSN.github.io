@@ -11,6 +11,10 @@
 - 偶尔水水生活
 - 一些碎碎念(或许)
 
-基于mkdocs-material
+基于 Zensical
 
-[mkdocs官方文档](https://mkdocs.org.cn/) [mkdocs-material官方文档](https://squidfunk.github.io/mkdocs-material/)
+[zensical 官方文档](https://zensical.org/)
+
+曾经基于 mkdocs-material
+
+[mkdocs 官方文档](https://mkdocs.org.cn/) [mkdocs-material 官方文档](https://squidfunk.github.io/mkdocs-material/)
