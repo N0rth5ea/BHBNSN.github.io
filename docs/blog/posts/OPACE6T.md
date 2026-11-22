@@ -4,30 +4,40 @@ date:
   updated: 2026-11-22
 ---
 
-# 一加 ACE6T ghostlock + gbl 漏洞持久化 root 的方法及原理分析
-
-> 声明：本文档仅用于技术研究和学习交流，禁止用于任何非法用途。
-> 目前网上已经出现了大量一键自动化利用 app 和模块，笔者当时还是手动利用、刷写的，故实际利用没有什么参考价值，故不放实际操作了，只梳理完整链路和原理分析。
+# 一加 ACE 6T GhostLock + GBL 漏洞持久化 Root 的方法及原理分析
 
 ## 背景
 
-新买了一加 ACE6T 手机，想要刷机，懒得等深度测试的申请，发现了可以通过 ghostlock + gbl 漏洞在不解锁 bootloader 的情况下持久化获取 root 权限。
+新买了一加 ACE 6T 手机，想要刷机，懒得等深度测试的申请，发现了可以通过 GhostLock + GBL 漏洞，在不走官方 Bootloader 解锁流程的情况下，实现持久化 Root 的方案。
+
+整个方案比较有意思，它并不是单纯利用一个漏洞直接获取 Root，而是组合利用了两个不同启动阶段的安全缺陷：
+
+- GhostLock：利用 Linux 内核漏洞，获取当前系统运行期间的一次性 Root 权限。
+- GBL：利用 Qualcomm Bootloader 的 EFISP 加载机制，接管部分启动流程，使修改后的引导程序能够被执行。
+
+最后通过修改 `init_boot`，实现每次开机自动获得 Root。
+
+<!-- more -->
+
+目前网上已经出现了大量一键自动化利用 App 和模块。笔者当时还是手动利用、刷写的，实际操作过程没有太大参考价值，因此本文不放具体操作步骤，主要梳理完整链路和原理。
+
+> 声明：本文仅用于个人设备的技术研究和安全学习。
 
 ## 原理
 
 ### 整体链路
 
-我们最终的目的是要获取 root 权限，也就是要刷写 init_boot 分区
+首先明确我们的最终目标：**让修补后具有 root 能力的 `init_boot` 能够在 Bootloader 锁定状态下被接受并正常启动。**
 
-刷写 init_boot 分区需要满足两个条件：
-1. 需要有 root 权限
-2. 需要 bootloader 成功校验
+传统的 root 中，刷写和校验 init_boot 分区都需要 bootloader 解锁，而在不解锁的情况下，我们有两个独立的核心问题：
 
-在常规下，bootloader 需要解锁才会放行非法签名的 init_boot，但是 gbl 漏洞实现了可以通过非法签名的 init_boot
+1. 如何写入 init_boot 分区？
+2. 如何让 bootloader 接受修改后的引导镜像？
 
-gbl 存储于 efisp 分区，因此利用这个漏洞我们需要刷写 efisp 分区，同时新版本系统的 abl 可能修复了这个漏洞，我们还需要刷写低版本 abl
+而这对应了我们要利用的两个漏洞：
 
-刷写这些分区都需要 root 权限，而 ghostlock 漏洞为我们提供了一次性的 root 权限
+- GhostLock 让我们可以临时提权，获取 root 权限，从而直接将修补后的镜像文件覆写到 /dev/block/by-name/init_boot 分区。
+- GBL/EFISP 让我们可以绕过 bl 对 init_boot 的校验，从而在手机启动时接受修补的 init_boot。
 
 至此，万事具备，链路如下：
 
@@ -38,7 +48,35 @@ gbl 存储于 efisp 分区，因此利用这个漏洞我们需要刷写 efisp �
 5. 再次利用 ghostlock 漏洞获取一次性 root 权限
 6. 利用 root 权限刷写 init_boot 分区，获取持久化 root 权限
 
-### 1. ghostlock 漏洞
+---
 
-ghostlock 是今年爆出的多个“核弹级” Linux 提权漏洞之一，是一个栈 UAF 漏洞，自2.6.39-rc1的 commit：8161239a8bcce9ad6b537c04a1fa3b5c68bae693引入，潜伏存在了 15 年。
+### 1. GhostLock 漏洞
 
+GhostLock 是今年公开的 Linux 内核提权漏洞，编号为 CVE-2026-43499，位于 Linux 内核的 futex / rt_mutex 优先级继承机制中，本质上是一个栈 UAF 漏洞，从 Linux 2.6.39-rc1 开始引入，直到 Linux 7.1 对应的修复版本才修复，潜伏时间超过 15 年。
+
+
+#### 1.1 futex 与 rt_mutex
+
+futex 是 Linux pthread_mutex 的实现，它实现了在用户态当中检测锁是否冲突，只用冲突时才进入内核，让冲突线程睡眠等待锁释放。
+
+在实际操作系统当中有一个经典的优先级反转（Priority Inversion）问题：
+
+假设有三个线程 A、B、C，它们的优先级分别为 High、Medium、Low
+
+- C 作为 Low 优先级线程，但是持有锁
+- A 作为 High 优先级线程，正在等待锁
+- B 不碰锁，执行 cpu 密集操作
+
+此时，由于 B 优先级比 C 高，导致 A 要等 C（锁），C 要等 B（优先级），A 虽然是优先级最高的线程，但是却必须等待优先级低一级的 B。
+
+而这个问题在 Linux 内核中，通过 futex PI（Priority Inheritance，优先级继承）机制实现：
+
+- 当高优先级线程等待低优先级线程持有的锁时，将其优先级传递给持有锁的线程上，从而保证上述案例中 A 不会被 B 给间接阻塞。
+
+**普通的 `pthread_mutex` 走的是普通 futex，并不涉及 PI**。只有显式设置了 `PTHREAD_PRIO_INHERIT` 属性的互斥锁，才会走 `FUTEX_LOCK_PI` / `FUTEX_WAIT_REQUEUE_PI` 这条路径。所以这条代码路径在日常负载里其实相当冷门——这也是它能潜伏十五年的原因之一。
+
+
+!!! note "参考资料"
+    1. [GhostLock（CVE-2026-43499）Linux内核futex子系统15年潜伏的栈UAF提权漏洞深度拆解](https://www.cnblogs.com/32bin/p/21919461){target="_blank" rel="noopener"}
+    2. [GhostLock（CVE-2026-43499）Linux 内核漏洞深度分析 - NebuSec](https://nebusec.ai/research/ionstack-part-2/){target="_blank" rel="noopener"}
+    3. [futex 与内核同步原语底层：等待队列、唤醒机制与 PI mutex](https://www.plumephp.com/os-futex-locks-internals/){target="_blank" rel="noopener"}
