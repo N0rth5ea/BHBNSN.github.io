@@ -16,6 +16,8 @@
 
 - ![wrlus](https://avatars.githubusercontent.com/u/20199567?v=4){ width="30" style="border-radius:50%; vertical-align: middle; margin-right: .5rem;" } [wrlus](https://wrlus.com/){:target="_blank" rel="noopener"}
 
+- ![samsara](https://blog.3amsara.com/image/myavatar.jpg){ width="30" style="border-radius:50%; vertical-align: middle; margin-right: .5rem;" } [samsara](https://blog.3amsara.com/){:target="_blank" rel="noopener"}
+
 ---
 
 >感谢这些组织的收容，共同成长才有了共同的成就
