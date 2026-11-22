@@ -23,7 +23,6 @@
 
 !!! note "相关链接"
     - [Zygote](#zygote)
-    - [System Server](#system-server)
 
 Android 是一个基于 Linux 内核的复杂操作系统。其启动过程是一个从硬件加电到显示应用界面的分层、接力过程。
 
@@ -89,7 +88,7 @@ Android 是一个基于 Linux 内核的复杂操作系统。其启动过程是�
 
 ## Zygote
 
-Zygote 是一个重要的进程，它预加载了大量的资源和类库，使得新进程能够快速启动。Zygote 通过 `fork` 自身来创建新的进程，这些新进程继承了 Zygote 预加载的资源，从而大大加快了应用的启动速度。关于 Zygote 的详细启动流程和实现细节，可以参考 aosp 解读文章中的 [Zygote 启动流程](aosp/zygote_startup.md) 和 [zygote 孵化流程](aosp/zygote_fork.md)。
+Zygote 是一个重要的进程，它预加载了大量的资源和类库，使得新进程能够快速启动。Zygote 通过 `fork` 自身来创建新的进程，这些新进程继承了 Zygote 预加载的资源，从而大大加快了应用的启动速度。关于 Zygote 的详细启动流程和实现细节，可以参考 aosp 解读文章。
 
 在某些双架构系统中，会生成两个 Zygote 进程（一个 64 位，一个 32 位），一般我们称 64 位的为主要 Zygote（primary zygote），32 位的为次要 Zygote（secondary zygote）。它们的启动流程基本相同。
 
