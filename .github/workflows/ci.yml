@@ -1,4 +1,4 @@
-name: Deploy MkDocs
+name: Deploy Zensical
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
       - main
 permissions:
   contents: write
-  pages: write
 
 jobs:
   deploy:
@@ -36,8 +35,8 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create CNAME file
-        run: echo "blog.n0rth5ea.online" > CNAME
+      - name: Build site
+        run: zensical build -c
 
       - name: Configure Git
         run: |
@@ -48,4 +47,4 @@ jobs:
         run: git fetch origin gh-pages --depth=1 || true
 
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy
+        run: ghp-import -n -p -b gh-pages -c blog.n0rth5ea.online site
